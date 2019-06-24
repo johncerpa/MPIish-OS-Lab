@@ -52,7 +52,8 @@ def Main():
     num_threads = complete[len(complete)-2]
     slave_index = complete[len(complete)-1]
 
-    complete = complete[0 : len(complete)-2]
+    # array of numbers that the threads are going to check
+    complete = complete[0 : len(complete)-2] 
     per_thread = ceil(len(complete) / num_threads)
     print(complete)
 
@@ -60,7 +61,7 @@ def Main():
     for i in range(0, len(complete), per_thread):
       thr = threading.Thread(
         target=imported_module.checkPrimes,
-        args=(complete[i:i+per_thread], slave_index, semaphore)
+        args=(complete, i, i+per_thread, slave_index, semaphore)
       )
       thr.start()
       threads.append(thr)

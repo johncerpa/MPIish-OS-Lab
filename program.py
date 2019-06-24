@@ -1,3 +1,4 @@
+PROGRAMSTART
 def isPrime(n):
   if n == 2 or n == 3: return True
   if n < 2 or n % 2 == 0: return False
@@ -17,3 +18,4 @@ def checkPrimes(arr, start, end, slave_index, semaphore):
     for i in range(start, end):
       f.write(str(arr[i]) + ', Y\n' if isPrime(arr[i]) else str(arr[i]) + ', N\n')
   semaphore.release()
+PROGRAMEND

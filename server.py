@@ -5,7 +5,6 @@ from math import ceil
 import sys, errno
 
 semaphore = threading.Lock()
-done = False
 
 def Main():
   num_slaves = int(input('Number of slaves: '))
@@ -39,7 +38,7 @@ def Main():
         print(f'Slave connected: {addr[0]}:{addr[1]}')
         
         # Start new slave thread
-        thr = threading.Thread(target=slave_thread, args=(slave_socket, slaves_connected))
+        thr = threading.Thread(target=slave_thread, args=(slave_socket,))
         thr.start()
         slaves_threads.append(thr)
         slaves_connected += 1
@@ -54,7 +53,8 @@ def Main():
           thr.start()
 
         ready = False
-        print('Sent files to every slave')        
+        print('Sent files to every slave')
+
 
   except KeyboardInterrupt:
     s.close()
@@ -79,7 +79,7 @@ def send_files(i, inputs_list, threads, slaves):
   with open('program.py', 'rb') as f: 
     slaves[i].sendfile(f, 0)
 
-def slave_thread(slave_socket, index):
+def slave_thread(slave_socket):
   data = slave_socket.recv(1024)
   complete = data.decode('ascii')
   while data:
@@ -99,7 +99,7 @@ def slave_thread(slave_socket, index):
   with open('results.csv', 'a+') as f:
     f.write(complete)
   semaphore.release()
-  
+
   slave_socket.close()
 
 if __name__ == '__main__':
