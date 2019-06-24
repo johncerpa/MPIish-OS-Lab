@@ -4,7 +4,6 @@ from csv import reader
 from math import ceil
 import sys, errno
 
-# Semaphore
 semaphore = threading.Lock()
 done = False
 
@@ -56,20 +55,25 @@ def Main():
         for i in range(len(inputs_list)): # Some slaves might not have a job
           
           # Creating a file for each slave
-          f = open(f'input{i}.csv', 'w+')
-          for j in range(len(inputs_list[i])):
-            f.write(str(inputs_list[i][j]) + ',')
-          f.write(str(threads))
-          f.write(str(i))
-          f.close()
+          with open(f'input{i}.csv', 'w+') as f: 
+            for j in range(len(inputs_list[i])):
+              f.write(str(inputs_list[i][j]) + ',')
+            # Attach number of threads and slave index
+            f.write(str(threads) + ',' + str(i))
 
-          # Sending file to each slave
-          f = open(f'input{i}.csv', 'rb')
-          slaves[i].sendfile(f, 0)
-          f.close()
+          # Sending file with input numbers to each slave
+          slaves[i].send(b'input')
+          with open(f'input{i}.csv', 'rb') as f:
+            slaves[i].sendfile(f, 0)
 
+          # Send program.py
+          slaves[i].send(b'program')
+          with open('prime.py', 'rb') as f: 
+            slaves[i].sendfile(f, 0)
+          slaves[i].send(b'program_done')
+          
         ready = False # only do it once
-        print('Sent files to slaves')        
+        print('Sent files to every slave')        
 
   except KeyboardInterrupt:
     s.close()
@@ -93,7 +97,7 @@ def slave_thread(slave_socket, index):
         sys.exit(1)
 
   semaphore.acquire()
-  f = open(f'output{index}.csv', 'a+')
+  f = open(f'results.csv', 'a+')
   f.write(complete)
   f.close()
   semaphore.release()
