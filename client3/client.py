@@ -9,7 +9,7 @@ def Main():
   slave_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   slave_socket.connect(('127.0.0.1', 12345))
   
-  slave_socket.settimeout(10)
+  slave_socket.settimeout(6)
   isDoneReceiving = False
   inputs = ''
 

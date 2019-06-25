@@ -27,6 +27,14 @@ def Main():
   for i in range(0, len(numbers), per_slave):
     inputs_list.append(numbers[i : i + per_slave])
 
+  for i in range(len(inputs_list)):
+    with open(f'input{i}.csv', 'w+') as f:
+      f.write('INPUTSTART\n')
+      for j in range(len(inputs_list[i])):
+        f.write(str(inputs_list[i][j]) + ',')
+      f.write(str(threads) + ',' + str(i) + '\nINPUTEND\n')
+
+  # i PROBABLY DONT HAVE TO EVEN ATTACH PROGRAMSTART, JUST SEND PROGRAMSTART DUMBBASS
   with open('prime.py', 'r+') as f:
     content = f.read()
     with open('program.py', 'w+') as p:  
@@ -71,12 +79,6 @@ def Main():
       slave.close()
 
 def send_files(i, inputs_list, threads, slaves):
-  with open(f'input{i}.csv', 'w+') as f:
-    f.write('INPUTSTART\n')
-    for j in range(len(inputs_list[i])):
-      f.write(str(inputs_list[i][j]) + ',')
-    f.write(str(threads) + ',' + str(i) + '\nINPUTEND\n')
-
   with open(f'input{i}.csv', 'rb') as f:
     slaves[i].sendfile(f, 0)
 
@@ -84,6 +86,7 @@ def send_files(i, inputs_list, threads, slaves):
     slaves[i].sendfile(f, 0)
 
 def slave_thread(slave_socket):
+  # blocking without timeout, the rest runs after this is done
   data = slave_socket.recv(1024)
   complete = data.decode('ascii')
   while data:
