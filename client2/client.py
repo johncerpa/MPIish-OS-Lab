@@ -9,7 +9,7 @@ def Main():
   slave_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   slave_socket.connect(('127.0.0.1', 12345))
   
-  slave_socket.settimeout(4)
+  slave_socket.settimeout(10)
   isDoneReceiving = False
   inputs = ''
 
@@ -59,9 +59,13 @@ def Main():
 
     threads = []
     for i in range(0, len(complete), per_thread):
+      end = i + per_thread
+      if (end > len(complete)):
+        end = len(complete)
+        
       thr = threading.Thread(
         target=imported_module.checkPrimes,
-        args=(complete, i, i+per_thread, slave_index, semaphore)
+        args=(complete, i, end, slave_index, semaphore)
       )
       thr.start()
       threads.append(thr)

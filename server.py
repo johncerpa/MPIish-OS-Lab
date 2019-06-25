@@ -27,6 +27,11 @@ def Main():
   for i in range(0, len(numbers), per_slave):
     inputs_list.append(numbers[i : i + per_slave])
 
+  with open('prime.py', 'r+') as f:
+    content = f.read()
+    with open('program.py', 'w+') as p:  
+      p.write('PROGRAMSTART\n' + content + '\nPROGRAMEND')
+
   slaves, slaves_connected = [], 0
   ready = False
   try:
@@ -48,13 +53,17 @@ def Main():
         slaves_connected += 1
 
       if (ready):
+        print('Inputs divided: ', inputs_list)
         for i in range(len(inputs_list)): # Some slaves might not have a job
-          thr = threading.Thread(target=send_files, args=(i, inputs_list, threads, slaves))
+          print(f'Sending files to slave {i}')
+          thr = threading.Thread(
+            target=send_files,
+            args=(i, inputs_list, threads, slaves)
+          )
           thr.start()
 
         ready = False
         print('Sent files to every slave')
-
 
   except KeyboardInterrupt:
     s.close()
@@ -70,11 +79,6 @@ def send_files(i, inputs_list, threads, slaves):
 
   with open(f'input{i}.csv', 'rb') as f:
     slaves[i].sendfile(f, 0)
-  
-  with open('prime.py', 'r+') as f:
-    content = f.read()
-    with open('program.py', 'w+') as p:  
-      p.write('PROGRAMSTART\n' + content + '\nPROGRAMEND')
 
   with open('program.py', 'rb') as f: 
     slaves[i].sendfile(f, 0)
