@@ -28,16 +28,9 @@ def Main():
 
   for i in range(len(inputs_list)):
     with open(f'input{i}.csv', 'w+') as f:
-      f.write('INPUTSTART\n')
       for j in range(len(inputs_list[i])):
         f.write(str(inputs_list[i][j]) + ',')
-      f.write(str(threads) + ',' + str(i) + '\nINPUTEND\n')
-
-  # i PROBABLY DONT HAVE TO EVEN ATTACH PROGRAMSTART, JUST SEND PROGRAMSTART DUMBBASS
-  with open('prime.py', 'r+') as f:
-    content = f.read()
-    with open('program.py', 'w+') as p:  
-      p.write('PROGRAMSTART\n' + content + '\nPROGRAMEND')
+      f.write(str(threads) + ',' + str(i) + '\n')
 
   slaves, slaves_connected = [], 0
   ready = False
@@ -76,11 +69,15 @@ def Main():
       slave.close()
 
 def send_files(i, slaves):
+  slaves[i].send(b'INPUTSTART')
   with open(f'input{i}.csv', 'rb') as f:
     slaves[i].sendfile(f, 0)
+  slaves[i].send(b'INPUTEND')
 
-  with open('program.py', 'rb') as f: 
+  slaves[i].send(b'PROGRAMSTART')
+  with open('prime.py', 'rb') as f: 
     slaves[i].sendfile(f, 0)
+  slaves[i].send(b'PROGRAMEND')
 
 def slave_thread(slave_socket):
   data = slave_socket.recv(1024)

@@ -27,12 +27,11 @@ def Main():
       sys.exit(1) # 1: Abnormal termination
 
     
-  with open('program.py', 'w+') as f:
+  with open('prime.py', 'w+') as f:
     start, end = "PROGRAMSTART", "PROGRAMEND"
     start_index = inputs.index(start) + len(start)
     end_index = inputs.index(end)
-    content = inputs[start_index : end_index]
-    f.write(content)
+    f.write(inputs[start_index : end_index])
 
   start, end = "INPUTSTART", "INPUTEND"
   start_index = inputs.index(start) + len(start)
@@ -40,7 +39,7 @@ def Main():
   inputs = inputs[start_index:end_index]
 
   # Importing program that the slave is going to run
-  imported_module = __import__('program')
+  imported_module = __import__('prime')
 
   # Convert input content to integers
   complete = inputs.split(',')
