@@ -9,24 +9,32 @@ def Main():
   slave_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   slave_socket.connect(('127.0.0.1', 12345))
   
-  slave_socket.settimeout(6)
-  isDoneReceiving = False
-  inputs = ''
+  # Sets a limit of 100s to receive the first bytes
+  slave_socket.settimeout(100)
+
+  isTimeoutSet = False
+
+  isDoneReceiving, inputs = False, ''
 
   while 1:
     try:
       data = slave_socket.recv(1024)
       inputs += data.decode('ascii')
+
+      # Set a lower limit to know when is done receiving
+      if (not isTimeoutSet):
+        slave_socket.settimeout(2)
+        isTimeoutSet = True
+        
     except (socket.error, socket.timeout) as e:
       err = e.args[0]
-      if err == errno.EAGAIN or err == 'timed out':  # No more data available
+      if err == errno.EAGAIN or err == 'timed out':
         isDoneReceiving = True
         break
       else:
         print(e)
         sys.exit(1)
-  
-  print('RECEIVED: \n', inputs)  
+    
   with open('program.py', 'w+') as f:
     start, end = "PROGRAMSTART", "PROGRAMEND"
     start_index = inputs.index(start) + len(start)
@@ -38,9 +46,6 @@ def Main():
   start_index = inputs.index(start) + len(start)
   end_index = inputs.index(end)
   inputs = inputs[start_index:end_index]
-
-  with open('program.py', 'r') as f:
-    print(f'Program:\n{f.read()}\nEnd of program\n')
 
   if (isDoneReceiving):
     imported_module = __import__('program')
@@ -73,9 +78,8 @@ def Main():
     for thr in threads:
       thr.join()
 
-    f = open(f'output{slave_index}.csv', 'rb')
-    slave_socket.sendfile(f, 0)
-    f.close()
+    with open(f'output{slave_index}.csv', 'rb') as f:
+      slave_socket.sendfile(f, 0)
 
 if __name__ == '__main__':
   Main()

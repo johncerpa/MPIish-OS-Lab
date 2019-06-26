@@ -9,15 +9,14 @@ semaphore = threading.Lock()
 def Main():
   num_slaves = int(input('Number of slaves: '))
   threads = int(input('Threads per slave: '))
-  slaves_threads = []
 
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  s.bind(('', 12345))
+  s.bind(('', 12345)) 
   s.listen(num_slaves)
-  print('Server listening on port 12345...')
+  print('Listening on port 12345...')
 
   # Dividing file proportional to threads
-  numbers = []
+  numbers, slaves_threads = [], []
   with open('big_input.csv') as input_file:
     csv_reader = reader(input_file, delimiter=',')
     for row in csv_reader:
@@ -45,7 +44,6 @@ def Main():
   try:
     while True:
       if (slaves_connected < num_slaves):
-        
         slave_socket, addr = s.accept()
         slaves.append(slave_socket)
         print(f'Slave connected: {addr[0]}:{addr[1]}')
@@ -66,7 +64,7 @@ def Main():
           print(f'Sending files to slave {i}')
           thr = threading.Thread(
             target=send_files,
-            args=(i, inputs_list, threads, slaves)
+            args=(i, slaves)
           )
           thr.start()
 
@@ -78,7 +76,7 @@ def Main():
     for slave in slaves:
       slave.close()
 
-def send_files(i, inputs_list, threads, slaves):
+def send_files(i, slaves):
   with open(f'input{i}.csv', 'rb') as f:
     slaves[i].sendfile(f, 0)
 
