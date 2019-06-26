@@ -5,7 +5,8 @@ semaphore = threading.Lock()
 def Main():
   slave_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-  server_ip = '127.0.0.1' # 192.168.0.14
+  # change this to server address ex: 192.168.0.14 
+  server_ip = '127.0.0.1'
   slave_socket.connect((server_ip, 12345))
   
   # Thread is blocked until it receives some data
