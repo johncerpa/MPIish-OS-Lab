@@ -1,6 +1,7 @@
 import socket, threading, prepare, sys
 
 semaphore = threading.Lock()
+slaves_on = 0
 
 def Main():
   num_slaves = int(input('Number of slaves: '))
@@ -14,10 +15,10 @@ def Main():
   inputs_list = prepare.divideInputFile('big_input.csv', num_slaves)
   prepare.saveInputFiles(threads)
 
-  slaves, slaves_threads, slaves_connected = [], [], 0
-  ready = False
+  slaves, slaves_threads, ready, slaves_connected = [], [], False, 0
   try:
     while True:
+      global slaves_on
       if (slaves_connected < num_slaves):
         slave_socket, addr = s.accept()
         slaves.append(slave_socket)
@@ -27,7 +28,9 @@ def Main():
         thr = threading.Thread(target=slave_thread, args=(slave_socket,))
         thr.start()
         slaves_threads.append(thr)
+
         slaves_connected += 1
+        slaves_on = slaves_connected
 
       if (slaves_connected == num_slaves):
         ready = True
@@ -41,9 +44,13 @@ def Main():
             args=(i, slaves)
           )
           thr.start()
-
         ready = False
         print('Sent files to every slave')
+      
+      if (slaves_on <= 0):
+        print('All the slaves are done with their jobs, exiting now!')
+        s.close()
+        break
 
   except KeyboardInterrupt:
     s.close()
@@ -83,6 +90,9 @@ def slave_thread(slave_socket):
   semaphore.release()
 
   slave_socket.close()
+
+  global slaves_on
+  slaves_on -= 1
 
 if __name__ == '__main__':
   Main()
