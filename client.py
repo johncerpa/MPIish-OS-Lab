@@ -9,29 +9,23 @@ def Main():
   slave_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   slave_socket.connect(('127.0.0.1', 12345))
   
-  # Sets a limit of 100s to receive the first bytes
-  slave_socket.settimeout(100)
+  # Thread is blocked until it receives some data
+  data = slave_socket.recv(1024)
+  inputs = data.decode('ascii')
 
-  isTimeoutSet, inputs = False, ''
+  # Set timeout to 2s to know when server is done sending data
+  slave_socket.settimeout(2)
 
-  while 1:
+  while data:
     try:
       data = slave_socket.recv(1024)
       inputs += data.decode('ascii')
+    except socket.timeout: # Done receiving data, break loop
+      break
+    except socket.error as e:
+      print(e)
+      sys.exit(1) # 1: Abnormal termination
 
-      # Set a lower limit to know when is done receiving
-      if (not isTimeoutSet):
-        slave_socket.settimeout(2)
-        isTimeoutSet = True
-        print('Receiving files...')
-
-    except (socket.error, socket.timeout) as e:
-      err = e.args[0]
-      if err == errno.EAGAIN or err == 'timed out':
-        break
-      else:
-        print(e)
-        sys.exit(1)
     
   with open('program.py', 'w+') as f:
     start, end = "PROGRAMSTART", "PROGRAMEND"

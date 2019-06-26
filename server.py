@@ -83,22 +83,21 @@ def send_files(i, slaves):
     slaves[i].sendfile(f, 0)
 
 def slave_thread(slave_socket):
-  # blocking without timeout, the rest runs after this is done
   data = slave_socket.recv(1024)
   complete = data.decode('ascii')
+
+  slave_socket.settimeout(4)
+
   while data:
     try:
-      slave_socket.settimeout(4) # if no more data is available, stop waiting
       data = slave_socket.recv(1024)
       complete += data.decode('ascii')
-    except (socket.error, socket.timeout) as e:
-      err = e.args[0]
-      if err == errno.EAGAIN or err == 'timed out':  # No more data available
-        break
-      else:
-        print(e)
-        sys.exit(1)
-
+    except socket.timeout:
+      break
+    except socket.error as e:
+      print(e)
+      sys.exit(1)
+    
   semaphore.acquire()
   with open('results.csv', 'a+') as f:
     f.write(complete)
