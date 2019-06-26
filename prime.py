@@ -11,7 +11,7 @@ def isPrime(n):
     f += 6
   return True
 
-def checkPrimes(arr, start, end, slave_index, semaphore):
+def checkPrimes(arr, start, end, semaphore):
   # Reading, no problem if threads access the array at the same time
   results = []
   for i in range(start, end):
@@ -20,7 +20,7 @@ def checkPrimes(arr, start, end, slave_index, semaphore):
 
   # Threads writing to the same file, a semaphore is needed
   semaphore.acquire()
-  with open(f'output{slave_index}.csv', 'a+') as f:
+  with open(f'output.csv', 'a+') as f:
     for i in range(len(results)):
-      f.write(results[i])
+      f.write(results[i]) # change to only one write
   semaphore.release()

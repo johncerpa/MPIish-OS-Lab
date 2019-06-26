@@ -42,11 +42,10 @@ def Main():
   complete = inputs.split(',')
   complete = [int(i) for i in complete]
 
-  num_threads = complete[len(complete)-2]
-  slave_index = complete[len(complete)-1]
+  num_threads = complete[len(complete)-1]
 
   # Get numbers to check
-  complete = complete[0 : len(complete)-2] 
+  complete = complete[0 : len(complete)-1] 
 
   print('Received program.py and input successfuly\nWorking on primality test...')
   per_thread = ceil(len(complete) / num_threads)
@@ -58,7 +57,7 @@ def Main():
       
     thr = threading.Thread(
       target=imported_module.checkPrimes,
-      args=(complete, i, end, slave_index, semaphore)
+      args=(complete, i, end, semaphore)
     )
     thr.start()
     threads.append(thr)
@@ -66,7 +65,7 @@ def Main():
   for thr in threads:
     thr.join()
 
-  with open(f'output{slave_index}.csv', 'rb') as f:
+  with open(f'output.csv', 'rb') as f:
     slave_socket.sendfile(f, 0)
   
   print('Primality test done and sent results to the server!')

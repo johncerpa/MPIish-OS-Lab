@@ -3,7 +3,6 @@ from csv import reader
 
 inputs_list = []
 
-# Dividing file proportional to threads
 def divideInputFile(name, num_slaves):
   numbers = []
   with open(name) as input_file:
@@ -16,11 +15,19 @@ def divideInputFile(name, num_slaves):
   return inputs_list
 
 def saveInputFiles(threads):
+  arr = []
   for i in range(len(inputs_list)):
+    myStr = ''
+    for j in range(len(inputs_list[i])):
+      if (j == len(inputs_list[i])-1):
+        myStr += str(inputs_list[i][j]) # No comma at the end
+      else:  
+        myStr += str(inputs_list[i][j]) + ','
+    arr.append(myStr)
+
+  for i in range(len(arr)):
       with open(f'input{i}.csv', 'w+') as f:
-        list_string = str(inputs_list[i])
-        list_string = list_string[1 : len(list_string)-1].replace(' ', '')
-        f.write(f'{list_string},{str(threads)},{str(i)}\n')
+        f.write(f'{arr[i]},{str(threads)}\n')
 
 def send_files(i, slaves):
   slaves[i].send(b'INPUTSTART')

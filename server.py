@@ -1,4 +1,4 @@
-import socket, threading, file_handling, sys
+import socket, threading, file_handling, sys, time
 
 semaphore = threading.Lock()
 slaves_on = 0
@@ -14,6 +14,8 @@ def Main():
 
   inputs_list = file_handling.divideInputFile('big_input.csv', num_slaves)
   file_handling.saveInputFiles(threads)
+
+  t = None
 
   slaves, slaves_threads, ready, slaves_connected = [], [], False, 0
   try:
@@ -35,9 +37,11 @@ def Main():
       if (slaves_connected == num_slaves):
         ready = True
         slaves_connected += 1
-
-      if (ready):
-        for i in range(len(inputs_list)): # Some slaves might not have a job
+ 
+      # If all slaves required are connected
+      if (ready): 
+        t = time.time()
+        for i in range(len(inputs_list)):
           print(f'Sending files to slave {i}')
           thr = threading.Thread(
             target=file_handling.send_files,
@@ -48,7 +52,7 @@ def Main():
         print('Sent files to every slave')
       
       if (slaves_on <= 0):
-        print('All the slaves are done with their jobs, exiting now!')
+        print(f'All the slaves are done with their jobs\nTime taken: {time.time() - t} seconds\nServer is exiting...')
         s.close()
         break
 
