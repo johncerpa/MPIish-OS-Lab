@@ -18,9 +18,9 @@ def divideInputFile(name, num_slaves):
 def saveInputFiles(threads):
   for i in range(len(inputs_list)):
       with open(f'input{i}.csv', 'w+') as f:
-        for j in range(len(inputs_list[i])):
-          f.write(str(inputs_list[i][j]) + ',')
-        f.write(str(threads) + ',' + str(i) + '\n')
+        list_string = str(inputs_list[i])
+        list_string = list_string[1 : len(list_string)-1].replace(' ', '')
+        f.write(f'{list_string},{str(threads)},{str(i)}\n')
 
 def send_files(i, slaves):
   slaves[i].send(b'INPUTSTART')
