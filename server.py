@@ -59,7 +59,6 @@ def Main():
         slaves_connected += 1
 
       if (ready):
-        print('Inputs divided: ', inputs_list)
         for i in range(len(inputs_list)): # Some slaves might not have a job
           print(f'Sending files to slave {i}')
           thr = threading.Thread(
