@@ -26,11 +26,6 @@ def Main():
         slaves.append(slave_socket)
         print(f'Slave connected: {addr[0]}:{addr[1]}')
         
-        # Start new slave thread
-        thr = threading.Thread(target=slave_thread, args=(slave_socket,))
-        thr.start()
-        slaves_threads.append(thr)
-
         slaves_connected += 1
         slaves_on = slaves_connected
 
@@ -44,10 +39,11 @@ def Main():
         for i in range(len(inputs_list)):
           print(f'Sending files to slave {i}')
           thr = threading.Thread(
-            target=file_handling.send_files,
+            target=slave_thread,
             args=(i, slaves)
           )
           thr.start()
+          slaves_threads.append(thr)
         ready = False
         print('Sent files to every slave')
       
@@ -61,7 +57,11 @@ def Main():
     for slave in slaves:
       slave.close()
 
-def slave_thread(slave_socket):
+def slave_thread(i, slaves):
+
+  slave_socket = slaves[i]
+  file_handling.send_files(i, slaves)
+
   data = slave_socket.recv(1024)
   complete = data.decode('ascii')
 
