@@ -1,8 +1,5 @@
-import socket, errno, sys, threading, os
-from time import sleep
+import socket, sys, threading
 from math import ceil
-from _thread import start_new_thread
-from importlib import import_module
 semaphore = threading.Lock()
 
 def Main():

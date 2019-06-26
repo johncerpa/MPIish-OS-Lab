@@ -1,8 +1,4 @@
-import socket, threading
-from _thread import start_new_thread
-from csv import reader
-from math import ceil
-import sys, errno
+import socket, threading, prepare, sys
 
 semaphore = threading.Lock()
 
@@ -15,24 +11,10 @@ def Main():
   s.listen(num_slaves)
   print('Listening on port 12345...')
 
-  # Dividing file proportional to threads
-  numbers, slaves_threads = [], []
-  with open('big_input.csv') as input_file:
-    csv_reader = reader(input_file, delimiter=',')
-    for row in csv_reader:
-      numbers.append(int(row[0]))
-  per_slave = ceil(len(numbers) / num_slaves)
-  inputs_list = []
-  for i in range(0, len(numbers), per_slave):
-    inputs_list.append(numbers[i : i + per_slave])
+  inputs_list = prepare.divideInputFile('big_input.csv', num_slaves)
+  prepare.saveInputFiles(threads)
 
-  for i in range(len(inputs_list)):
-    with open(f'input{i}.csv', 'w+') as f:
-      for j in range(len(inputs_list[i])):
-        f.write(str(inputs_list[i][j]) + ',')
-      f.write(str(threads) + ',' + str(i) + '\n')
-
-  slaves, slaves_connected = [], 0
+  slaves, slaves_threads, slaves_connected = [], [], 0
   ready = False
   try:
     while True:
