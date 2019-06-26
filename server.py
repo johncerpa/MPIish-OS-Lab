@@ -1,4 +1,4 @@
-import socket, threading, prepare, sys
+import socket, threading, file_handling, sys
 
 semaphore = threading.Lock()
 slaves_on = 0
@@ -12,8 +12,8 @@ def Main():
   s.listen(num_slaves)
   print('Listening on port 12345...')
 
-  inputs_list = prepare.divideInputFile('big_input.csv', num_slaves)
-  prepare.saveInputFiles(threads)
+  inputs_list = file_handling.divideInputFile('big_input.csv', num_slaves)
+  file_handling.saveInputFiles(threads)
 
   slaves, slaves_threads, ready, slaves_connected = [], [], False, 0
   try:
@@ -40,7 +40,7 @@ def Main():
         for i in range(len(inputs_list)): # Some slaves might not have a job
           print(f'Sending files to slave {i}')
           thr = threading.Thread(
-            target=send_files,
+            target=file_handling.send_files,
             args=(i, slaves)
           )
           thr.start()
@@ -56,17 +56,6 @@ def Main():
     s.close()
     for slave in slaves:
       slave.close()
-
-def send_files(i, slaves):
-  slaves[i].send(b'INPUTSTART')
-  with open(f'input{i}.csv', 'rb') as f:
-    slaves[i].sendfile(f, 0)
-  slaves[i].send(b'INPUTEND')
-
-  slaves[i].send(b'PROGRAMSTART')
-  with open('prime.py', 'rb') as f: 
-    slaves[i].sendfile(f, 0)
-  slaves[i].send(b'PROGRAMEND')
 
 def slave_thread(slave_socket):
   data = slave_socket.recv(1024)
