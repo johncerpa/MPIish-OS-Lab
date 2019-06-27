@@ -5,13 +5,17 @@ inputs_list = []
 
 def divideInputFile(name, num_slaves):
   numbers = []
+
   with open(name) as input_file:
     csv_reader = reader(input_file, delimiter=',')
     for row in csv_reader:
       numbers.append(int(row[0]))
+  
   per_slave = ceil(len(numbers) / num_slaves)
+  
   for i in range(0, len(numbers), per_slave):
     inputs_list.append(numbers[i : i + per_slave])
+    
   return inputs_list
 
 def saveInputFiles(threads):

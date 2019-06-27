@@ -13,6 +13,11 @@ def Main():
   data = slave_socket.recv(1024)
   inputs = data.decode('ascii')
 
+  if (inputs == 'close'):
+    print('I am not working today, thank god! Bye...')
+    slave_socket.close()
+    sys.exit(0)
+
   # Set timeout to 2s to know when server is done sending data
   slave_socket.settimeout(2)
 

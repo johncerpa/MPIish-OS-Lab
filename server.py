@@ -44,6 +44,14 @@ def Main():
           )
           thr.start()
           slaves_threads.append(thr)
+        
+        # Close connection of slaves that don't have a job to do
+        if (len(inputs_list) < slaves_on):
+          for i in range(len(inputs_list), slaves_on):
+            slaves[i].send(b'close')
+            print(f'There is no inputs left for slave {i}. Shutting it down...')
+          slaves_on = len(inputs_list)
+
         ready = False
         print('Sent files to every slave')
       
@@ -65,7 +73,7 @@ def slave_thread(i, slaves):
   data = slave_socket.recv(1024)
   complete = data.decode('ascii')
 
-  slave_socket.settimeout(4)
+  slave_socket.settimeout(1)
 
   while data:
     try:
