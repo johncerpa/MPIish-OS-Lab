@@ -4,37 +4,45 @@ semaphore = threading.Lock()
 slaves_on = 0
 
 def Main():
-  num_slaves = int(input('Number of slaves: '))
-  threads = int(input('Threads per slave: '))
-
+  
+  port = 12345
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  s.bind(('', 12345)) 
-  s.listen(num_slaves)
-  print('Listening on port 12345...')
-
-  inputs_list = file_handling.divideInputFile('big_input.csv', num_slaves)
-  file_handling.saveInputFiles()
+  s.bind(('', port)) 
+  s.listen(100)
+  print(f'NOTE: if you want to add more slaves you should answer \'n\'. \nIf you answer \'y\' then the slaves that connected after are going to be ignored.\nServer is listening on port {port}...')
 
   t = None
-
-  slaves, slaves_threads, ready, slaves_connected = [], [], False, 0
+  shouldStart, isReady = False, False
+  slaves, slaves_threads = [], []
+  
   try:
     while True:
+      
       global slaves_on
-      if (slaves_connected < num_slaves):
-        slave_socket, addr = s.accept()
-        slaves.append(slave_socket)
-        print(f'Slave connected: {addr[0]}:{addr[1]}')
-        
-        slaves_connected += 1
-        slaves_on = slaves_connected
 
-      if (slaves_connected == num_slaves):
-        ready = True
-        slaves_connected += 1
- 
-      # If all slaves required are connected
-      if (ready): 
+      if (not shouldStart):
+        print('Waiting for a slave to connect...')  
+        try:      
+          slave_socket, addr = s.accept()
+          slaves.append(slave_socket)
+          slaves_on += 1
+          print(f'Slave connected: {addr[0]}:{addr[1]}')
+        except socket.error:
+          print('There was an error connecting to a slave')
+          pass
+        
+        ans = input('Do you want to add mores slaves after this connection? (y/n) >> ')
+        if (ans == 'n'):
+          shouldStart = True
+          isReady = True
+
+      if (isReady):
+        # If all slaves required are connected
+        inputs_list = file_handling.divideInputFile('big_input.csv', slaves_on)
+        file_handling.saveInputFiles()
+
+        threads = int(input('Threads per slave: '))
+
         t = time.time()
         for i in range(len(inputs_list)):
           print(f'Sending files to slave {i}')
@@ -52,7 +60,7 @@ def Main():
             print(f'There is no inputs left for slave {i}. Shutting it down...')
           slaves_on = len(inputs_list)
 
-        ready = False
+        isReady = False
         print('Sent files to every slave')
       
       if (slaves_on <= 0):
@@ -61,9 +69,9 @@ def Main():
         break
 
   except KeyboardInterrupt:
-    s.close()
-    for slave in slaves:
-      slave.close()
+      s.close()
+      for slave in slaves:
+        slave.close()
 
 def slave_thread(i, slaves, threads):
 
@@ -72,7 +80,6 @@ def slave_thread(i, slaves, threads):
 
   data = slave_socket.recv(1024)
   complete = data.decode('ascii')
-
   slave_socket.settimeout(1)
 
   while data:

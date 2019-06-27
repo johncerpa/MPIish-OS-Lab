@@ -8,10 +8,16 @@ def Main():
   # change this to server address ex: 192.168.0.14 
   server_ip = '127.0.0.1'
   slave_socket.connect((server_ip, 12345))
+
+  print('Waiting for the server...')
   
   # Thread is blocked until it receives some data
-  data = slave_socket.recv(1024)
-  decoded = data.decode('ascii')
+  try:
+    data = slave_socket.recv(1024)
+    decoded = data.decode('ascii')
+  except socket.error as e:
+    print('Server decided to start without this slave. Shutting down...')
+    sys.exit(0)
 
   if (decoded == 'close'):
     print('I am not working today, thank god! Bye...')
