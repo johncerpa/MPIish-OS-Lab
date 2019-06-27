@@ -32,12 +32,11 @@ def Main():
           pass
         
         ans = input('Do you want to add mores slaves after this connection? (y/n) >> ')
-        if (ans == 'n'):
+        if (ans == 'n'):  
           shouldStart = True
           isReady = True
 
       if (isReady):
-        # If all slaves required are connected
         inputs_list = file_handling.divideInputFile('big_input.csv', slaves_on)
         file_handling.saveInputFiles()
 
