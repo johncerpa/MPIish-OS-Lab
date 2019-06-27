@@ -11,16 +11,19 @@ def Main():
   
   # Thread is blocked until it receives some data
   data = slave_socket.recv(1024)
-  inputs = data.decode('ascii')
+  decoded = data.decode('ascii')
 
-  if (inputs == 'close'):
+  if (decoded == 'close'):
     print('I am not working today, thank god! Bye...')
     slave_socket.close()
     sys.exit(0)
 
-  # Set timeout to 2s to know when server is done sending data
-  slave_socket.settimeout(2)
+  num_threads = int(decoded)
 
+  # Set timeout to 1s to know when server is done sending data
+  slave_socket.settimeout(1)
+
+  inputs = ''
   while data:
     try:
       data = slave_socket.recv(1024)
@@ -50,10 +53,8 @@ def Main():
   complete = inputs.split(',')
   complete = [int(i) for i in complete]
 
-  num_threads = complete[len(complete)-1]
-
   # Get numbers to check
-  complete = complete[0 : len(complete)-1] 
+  complete = complete[0 : len(complete)] 
 
   print('Received program.py and input successfuly\nWorking on primality test...')
   per_thread = ceil(len(complete) / num_threads)

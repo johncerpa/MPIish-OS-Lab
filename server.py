@@ -13,7 +13,7 @@ def Main():
   print('Listening on port 12345...')
 
   inputs_list = file_handling.divideInputFile('big_input.csv', num_slaves)
-  file_handling.saveInputFiles(threads)
+  file_handling.saveInputFiles()
 
   t = None
 
@@ -40,7 +40,7 @@ def Main():
           print(f'Sending files to slave {i}')
           thr = threading.Thread(
             target=slave_thread,
-            args=(i, slaves)
+            args=(i, slaves, threads)
           )
           thr.start()
           slaves_threads.append(thr)
@@ -65,10 +65,10 @@ def Main():
     for slave in slaves:
       slave.close()
 
-def slave_thread(i, slaves):
+def slave_thread(i, slaves, threads):
 
   slave_socket = slaves[i]
-  file_handling.send_files(i, slaves)
+  file_handling.send_files(i, slaves, threads)
 
   data = slave_socket.recv(1024)
   complete = data.decode('ascii')
