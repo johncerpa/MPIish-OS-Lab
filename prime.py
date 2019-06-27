@@ -13,14 +13,13 @@ def isPrime(n):
 
 def checkPrimes(arr, start, end, semaphore):
   # Reading, no problem if threads access the array at the same time
-  results = []
+  result = ''
   for i in range(start, end):
     r = 'Y' if isPrime(arr[i]) else 'N'
-    results.append(f'{str(arr[i])}, {r}\n')      
+    result += f'{str(arr[i])}, {r}\n'
 
   # Threads writing to the same file, a semaphore is needed
   semaphore.acquire()
   with open(f'output.csv', 'a+') as f:
-    for i in range(len(results)):
-      f.write(results[i]) # change to only one write
+    f.write(result)
   semaphore.release()
