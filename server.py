@@ -9,7 +9,7 @@ def Main():
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   s.bind(('', port)) 
   s.listen(100)
-  print(f'NOTE: if you want to add more slaves you should answer \'n\'. \nIf you answer \'y\' then the slaves that connected after are going to be ignored.\nServer is listening on port {port}...')
+  print(f'NOTE: If you answer \'n\' then the slaves that connected after are going to be ignored.\nServer is listening on port {port}...')
 
   t = None
   shouldStart, isReady = False, False
